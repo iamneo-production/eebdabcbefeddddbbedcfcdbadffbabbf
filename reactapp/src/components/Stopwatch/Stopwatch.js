@@ -35,7 +35,7 @@ function Stopwatch() {
   };
 
   const handleButton1Click = () => {
-    if (button1State === "Start") {
+    if (button1State === "Start" || button1State === "Resume") {
       setButton1State("Pause");
       setButton2State("Reset");
       startTimer();
@@ -43,17 +43,13 @@ function Stopwatch() {
       setButton1State("Resume");
       setButton2State("Reset");
       pauseTimer();
-    } else if (button1State === "Resume") {
-      setButton1State("Pause");
-      setButton2State("Reset");
-      startTimer();
     }
   };
 
   const handleButton2Click = () => {
     if (button1State === "Pause" || button1State === "Resume") {
       resetTimer();
-      setButton1State("Start")
+      setButton1State("Start");
       setButton2State("Reset");
       pauseTimer();
     }
@@ -67,12 +63,10 @@ function Stopwatch() {
           {`${time.hours.toString().padStart(2, "0")} : ${time.minutes.toString().padStart(2, "0")} : ${time.seconds.toString().padStart(2, "0")}`}
         </p>
         <button onClick={handleButton1Click} data-testid="button" className="button">
-          {button1State === "Start" && "Start"}
-          {button1State === "Pause" && "Pause"}
-          {button1State === "Resume" && "Resume"}
+          {button1State}
         </button>
         <button onClick={handleButton2Click} disabled={button1State === "Start"} data-testid="button" className="button">
-          {button2State === "Reset" && "Reset"}
+          {button2State}
         </button>
       </p>
     </div>
