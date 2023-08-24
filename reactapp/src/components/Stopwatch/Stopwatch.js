@@ -1,71 +1,82 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 
+function Stopwatch() {
+  const [time, setTime] = useState({ hours: 0, minutes: 0, seconds: 0 });
+  const [intervalId, setIntervalId] = useState(null);
+  const [button1State, setButton1State] = useState("Start");
+  const [button2State, setButton2State] = useState("Reset");
 
-const Stopwatch = () => {
-    const [timer, setTimer] = useState(0)
-    const [isActive, setIsActive] = useState(false)
-    const [isPaused, setIsPaused] = useState(false)
-    const increment = useRef(null)
-  
-    const handleStart = () => {
-      setIsActive(true)
-      setIsPaused(true)
-      increment.current = setInterval(() => {
-        setTimer((timer) => timer + 1)
-      }, 1000)
+  const startTimer = () => {
+    const id = setInterval(() => {
+      setTime((prevTime) => {
+        let seconds = prevTime.seconds + 1;
+        let minutes = prevTime.minutes;
+        let hours = prevTime.hours;
+        if (seconds === 60) {
+          seconds = 0;
+          minutes = prevTime.minutes + 1;
+        }
+        if (minutes === 60) {
+          minutes = 0;
+          hours = prevTime.hours + 1;
+        }
+        return { hours, minutes, seconds };
+      });
+    }, 1000);
+    setIntervalId(id);
+  };
+
+  const pauseTimer = () => {
+    clearInterval(intervalId);
+  };
+
+  const resetTimer = () => {
+    setTime({ hours: 0, minutes: 0, seconds: 0 });
+  };
+
+  const handleButton1Click = () => {
+    if (button1State === "Start") {
+      setButton1State("Pause");
+      setButton2State("Reset");
+      startTimer();
+    } else if (button1State === "Pause") {
+      setButton1State("Resume");
+      setButton2State("Reset");
+      pauseTimer();
+    } else if (button1State === "Resume") {
+      setButton1State("Pause");
+      setButton2State("Reset");
+      startTimer();
     }
-  
-    const handlePause = () => {
-      clearInterval(increment.current)
-      setIsPaused(false)
+  };
+
+  const handleButton2Click = () => {
+    if (button1State === "Pause" || button1State === "Resume") {
+      resetTimer();
+      setButton1State("Start")
+      setButton2State("Reset");
+      pauseTimer();
     }
-  
-    const handleResume = () => {
-      setIsPaused(true)
-      increment.current = setInterval(() => {
-        setTimer((timer) => timer + 1)
-      }, 1000)
-    }
-  
-    const handleReset = () => {
-      clearInterval(increment.current)
-      setIsActive(false)
-      setIsPaused(false)
-      setTimer(0)
-    }
-  
-    const formatTime = () => {
-      const getSeconds = `0${(timer % 60)}`.slice(-2)
-      const minutes = `${Math.floor(timer / 60)}`
-      const getMinutes = `0${minutes % 60}`.slice(-2)
-      const getHours = `0${Math.floor(timer / 3600)}`.slice(-2)
-  
-      return `${getHours} : ${getMinutes} : ${getSeconds}`
-    }
-  
-    return (
-      <div className="outer-main">
-        <p className="inner-main">
+  };
+
+  return (
+    <div className="outer-main">
+      <p className="inner-main">
         <p className="head">React Stopwatch</p>
-        <p  data-testid="time" className="time">
-            {formatTime()}
-          </p>
-          <div  data-testid="button" >
-            {
-              !isActive && !isPaused ?
-                <button onClick={handleStart} className="button"  data-testid="start" >Start</button>
-                : (
-                  isPaused ? <button onClick={handlePause} className="button" data-testid="pause">Pause</button> :
-                    <button onClick={handleResume} className="button" data-testid="resume">Resume</button>
-                )
-            }
-            
-            <button onClick={handleReset} disabled={!isActive} className="button" data-testid="reset">Reset
-            </button>
-            </div>
+        <p data-testid="time" className="time">
+          {`${time.hours.toString().padStart(2, "0")} : ${time.minutes.toString().padStart(2, "0")} : ${time.seconds.toString().padStart(2, "0")}`}
         </p>
-      </div>
-    );
-  }
-  
-  export default Stopwatch;
+        <button onClick={handleButton1Click} data-testid="button" className="button">
+          {button1State === "Start" && "Start"}
+          {button1State === "Pause" && "Pause"}
+          {button1State === "Resume" && "Resume"}
+        </button>
+        <button onClick={handleButton2Click} disabled={button1State === "Start"} data-testid="button" className="button">
+          {button2State === "Reset" && "Reset"}
+        </button>
+      </p>
+    </div>
+  );
+}
+
+export default Stopwatch;
